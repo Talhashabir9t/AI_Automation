@@ -1,0 +1,174 @@
+{
+  "name": "Script  voice generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-script",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        -120
+      ],
+      "id": "c86597f2-480d-4695-aa6c-f4012d464a12",
+      "name": "Webhook",
+      "webhookId": "33fb0a36-fb4d-47b1-ac91-fa4cfb41d50b"
+    },
+    {
+      "parameters": {
+        "jsCode": "const title = $input.first().json.body.title;\nconst content = $input.first().json.body.content;\n\nconst prompt = `\n\n\nBlog Title: ${title}\nBlog Content: ${content}\n\nPlease generate:\n1. TRANSCRIPT: Just the spoken words with punctuation\n2. DETAILED SCRIPT: Include CUT TO directions and visuals in [brackets]\n`;\n\nreturn [{\n  json: {\n    prompt: prompt\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        40
+      ],
+      "id": "596c924f-e54c-4847-b42e-c0ea7c645632",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Here's a detailed prompt template for the OpenAI node:{{ $('Webhook').item.json.body.content }}\nYou are a scriptwriter for YouTube videos that perfectly mimics the speaking style of the content creator. Create a script based on the following topic/blog:\n\n[BLOG_CONTENT]\n\nFollow these specific speaking style guidelines:\n- Talking Cadence: Moderate to slightly fast pace (130-150 WPM)\n- Use rhythmic variation with intentional pauses (0.5-1.5 seconds)\n- Use shorter sentences for impact\n- Maintain a conversational and friendly tone\n- Place emphasis on key words and concepts\n- Use common phrases like \"Now,\" \"Here's the thing,\" \"What's interesting is\"\n- Include confidence indicators: \"Absolutely,\" \"Definitely,\" \"Truly\"\n- Add conversational confirmations: \"Right?\" \"You know?\" \"Does that make sense?\"\n- Avoid highly technical jargon and negative language\n- Use informal to semi-formal language with occasional casual contractions\n- Incorporate storytelling techniques with phrases like \"Imagine if...\" and \"Think of it like...\"\n\nalso saved the  data script ({{ $json.prompt }}) in text formet in google Docs \n\nScript requirements:\n- Length: 1,500-2,250 words (10-15 minute script at 150-160 WPM)\n- Include a compelling opening hook\n- Include a call to action at the end\n- Format the punctuation to guide AI voice inflection (commas, periods, question marks, exclamation marks, \"...\", and \"-\")\n",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -60,
+        40
+      ],
+      "id": "88c5b9e2-dd22-43ac-a5ae-13ef0ec2a9aa",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "So3QtsPDYxXrpqWN",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $('Webhook').item.json.body.content }}",
+        "voice": "nova",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        340,
+        -80
+      ],
+      "id": "face1af1-c3c7-4829-a7ea-172f049fa03f",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "So3QtsPDYxXrpqWN",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "https://docs.google.com/document/d/1KuO8ETOiSgakvAvgQiBIU_r2C8W4IJ_LuwVxPNPXHTk/edit?tab=t.0",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $json.message.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        340,
+        160
+      ],
+      "id": "6ea57ebf-9a48-4802-962c-5ec980b964bc",
+      "name": "Google Docs1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "yNmq4B8N8umjlD2D",
+          "name": "Google Docs account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Docs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "79182363-5f78-44b2-bede-1144b6ede80a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "506e25af602fa53e46daf585e67889fbe5e5af534b8ddfc3af18abf7e6d70c95"
+  },
+  "id": "0cpyWIS7RWtBsXUp",
+  "tags": []
+}

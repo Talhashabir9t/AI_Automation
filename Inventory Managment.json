@@ -1,0 +1,241 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "=hostedChat",
+        "initialMessages": "=Inventory Support Center! 👋\nMy name is Talha. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -860,
+        -180
+      ],
+      "id": "91aafad9-6c48-4d04-babc-edbc24efb2ba",
+      "name": "When chat message received",
+      "webhookId": "92d87d9e-11b4-41f1-8740-7aedc64ed8fe"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -600,
+        -240
+      ],
+      "id": "18265243-4b98-4f5a-93a9-d6099927c9fc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "ccf731a8-3013-43e0-a3d0-c8ebdd75cda1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1EDVv8elRPVZIGG3",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 4
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -540,
+        0
+      ],
+      "id": "89184cef-c0bf-4b83-949e-4a92747972b6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks",
+          "mode": "list",
+          "cachedResultName": "Home_Items",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "Items": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Items', ``, 'string') }}",
+            "Quantity": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Quantity', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Items"
+          ],
+          "schema": [
+            {
+              "id": "Items",
+              "displayName": "Items",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        -180,
+        -40
+      ],
+      "id": "e166dfd7-9a01-4f99-9fdd-550383808ea4",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hxf5vu71Pce5YeL4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks",
+          "mode": "list",
+          "cachedResultName": "Home_Items",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/146rkUoSOofuHOUdZwNS6J2TbE8MCAnq3qlY5QTV0_ks/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        -340,
+        -20
+      ],
+      "id": "dbc63114-86df-4881-8320-66cda3800613",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hxf5vu71Pce5YeL4",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3b09f5fe-d0eb-4ce7-8ff1-307314aabe6a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "506e25af602fa53e46daf585e67889fbe5e5af534b8ddfc3af18abf7e6d70c95"
+  },
+  "id": "UI8d2foOkXpXoi8d",
+  "tags": []
+}

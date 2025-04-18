@@ -1,0 +1,209 @@
+{
+  "name": "Hotel Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -520,
+        -300
+      ],
+      "id": "acc39bdb-8fd8-4f3f-ac20-f53ff54f8ffc",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xONgOyfSWHCwHRhz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "687a8f0a-1631-46ad-8d25-e1478737cfda",
+              "leftValue": "={{ $json.message.content.Confidence }}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        -120
+      ],
+      "id": "054380f7-2e1b-40e6-930f-f09033b42945",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.message.content.Email }}",
+        "subject": "=Dear  {{ $json.message.content.name }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content['inquiry-Response'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        920,
+        -280
+      ],
+      "id": "834dcd90-be9d-4f47-beeb-0255588067cd",
+      "name": "Gmail",
+      "webhookId": "b0b9d69e-e079-4a09-8a6a-bf7f884a0844",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xONgOyfSWHCwHRhz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a hotel assistant AI that processes Gmail emails.\n\nEach email includes the following fields:\n- From: \"{{ $json.headers.from }}\"\n- Subject: \"{{ $json.headers.subject }}\"\n- mail: \"{{ $json.text }}\"\n\nYour task is to classify the email into one of these two categories:\n\n---\n\n### 📘 Category 1 – Hotel Inquiry or Positive Feedback:\nClassify as `\"category\": 1` if:\n- The email is from a human AND\n  - Contains a **question about the hotel** (e.g. prices, availability, services), OR\n  - Includes **positive feedback**, a **good review**, or **kind words** about the hotel\n\nIf it's Category 1:\n- Set `\"category\": 1`\n- Set `\"Confidence\"` between **0.6 and 1**\n- If confidence > 0.6, include a kind and professional hotel manager reply in `\"inquiry-Response\"`\n\n---\n\n### ❌ Category 0 – Non-Inquiry or Negative Feedback:\nClassify as `\"category\": 0` if:\n- The email is:\n  - An advertisement, spam, or automated\n  - Not about the hotel\n  - A **negative review**, **complaint**, or **bad experience**\n\nIf it's Category 0:\n- Set `\"category\": 0`\n- Set `\"Confidence\"` between **0.0 and 0.5**\n- Do **not** generate a reply\n- Instead include a simple reason in `\"data\"`\n-send this email directly to slack\n\n---\n\n### Output Format:\nRespond strictly in this JSON format:\n\n```json\n{\n  \"category\": 0,\n  \"name\": \"[Sender's name or infer]\",\n  \"Email\": \"[Sender's email]\",\n  \"data\": \"[Reason why this was marked as category 0]\",\n  \"Confidence\": 0.45\n}\n",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -20,
+        -80
+      ],
+      "id": "cf8dd455-767b-4c4d-b725-2779e497cb69",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "So3QtsPDYxXrpqWN",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U08MV3HQKQV",
+          "mode": "list",
+          "cachedResultName": "mmmvvv1112222"
+        },
+        "text": "={{ $('Gmail Trigger').item.json.text }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        920,
+        0
+      ],
+      "id": "f8073806-41e3-4775-9a40-9730ea1a0b87",
+      "name": "Slack",
+      "webhookId": "e4dc7d33-bb30-4aed-b3b1-d9efe97330d5",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "CpdtZQZBFdfkaqXs",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8c64dde5-ce4a-4dd8-b734-9aa62d4c0214",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "506e25af602fa53e46daf585e67889fbe5e5af534b8ddfc3af18abf7e6d70c95"
+  },
+  "id": "gV5pC1My3EJoYc14",
+  "tags": []
+}
