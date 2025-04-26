@@ -1,0 +1,320 @@
+{
+  "name": "Hotel Price Parity Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1300,
+        -160
+      ],
+      "id": "a74b4d76-ff11-4c1f-8707-d6d73fca2ee7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://data.xotelo.com/api/rates?hotel_key=g304555-d21290640&chk_in=2025-04-25&chk_out=2025-04-26",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1080,
+        -60
+      ],
+      "id": "d0582762-ec05-4a9a-a00e-b73c062e4ba5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02f63542-21de-46f3-93e2-bdc291a30985",
+              "name": "Hotel_name",
+              "value": "={{ $json.result.rates[0].code }}",
+              "type": "string"
+            },
+            {
+              "id": "9341337d-b8d9-4a7e-a8dc-b62411b507ee",
+              "name": "Hotel_price",
+              "value": "={{ $json.result.rates[0].rate }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        -60
+      ],
+      "id": "d5249c9e-3dff-4b48-858e-c713190064c0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6c883fb9-05ad-462f-b8f0-3adf482566ae",
+              "leftValue": "={{ $json.Hotel_price }}",
+              "rightValue": 25,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "3a76b7c5-6efb-466f-b451-a26e6ace5564",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -660,
+        -60
+      ],
+      "id": "b3f8b616-1fb9-4553-9f9a-b945dd7b4424",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "codeanalytics001@gmail.com",
+        "subject": "=Request to Fix Pricing Discrepancy for  {{ $json.Hotel_name }}",
+        "emailType": "text",
+        "message": "= Hope you're doing well.  We have noticed a pricing discrepancy for our property, {{ $json.Hotel_name }}, listed on your platform.  The rate currently displayed is not aligned with the official rates we have provided.  Kindly update the pricing to reflect the correct amount:  Correct Rate: $25  Please treat this as urgent to avoid confusion for potential guests.  Feel free to reach out if you need any further details.  Thank you for your immediate attention to this matter.  Best regards, Talha Shabir Hotel Manager {{ $json.Hotel_name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -360,
+        -180
+      ],
+      "id": "50fcaa19-ea0c-471a-b303-758bb1add136",
+      "name": "Gmail",
+      "webhookId": "d498df2d-da44-49d1-9d58-6e8d739e3d6c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "awDT03CjLCa1EzW9",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes",
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('If').item.json.Hotel_name }}",
+            "threadId": "={{ $('If').item.json.Hotel_price }}",
+            "labelIds": "={{ $json.labelIds[0] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "labelIds",
+              "displayName": "labelIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -140,
+        -180
+      ],
+      "id": "4af5eb29-46c3-44a7-b508-3c87e5f13afd",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MrGzJWoSrKPzazzG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "USLACKBOT",
+          "mode": "list",
+          "cachedResultName": "slackbot"
+        },
+        "text": "the price of our hotel in this website is fine",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -340,
+        80
+      ],
+      "id": "5d663e13-073e-4a17-a026-b663c0a3d5ce",
+      "name": "Slack",
+      "webhookId": "16e3b4dc-c908-418d-a2cf-b3ed31a510f2",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "yl8Nhs85RKQ30NhF",
+          "name": "Slack account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7ce1440c-cce4-43a9-85a2-74fa16e2e149",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3ff039c72e3fa332533e0110fefd50e99104ca0e9a772b8907db36b69d99d60"
+  },
+  "id": "DoTxFL5s1N4xaICH",
+  "tags": []
+}
