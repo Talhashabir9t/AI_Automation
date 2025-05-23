@@ -1,0 +1,363 @@
+{
+  "name": "Update Hotel Price Parity Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1260,
+        -160
+      ],
+      "id": "9d5f6cc4-f15c-4283-8a9f-f4511534bc21",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://data.xotelo.com/api/rates?hotel_key=g304555-d21290640&chk_in=2025-05-24&chk_out=2025-05-26",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1060,
+        40
+      ],
+      "id": "ba710637-6938-484a-8c13-44b40b4cd30f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rates = items[0].json.result?.rates || [];\n\n// Return one item containing all hotels in an array\nreturn [{\n  json: {\n    hotels: rates\n  }\n}];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -820,
+        40
+      ],
+      "id": "29b158e2-d9fa-4fc4-abc6-5c7c0caa5009",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -540,
+        60
+      ],
+      "id": "cfba23dd-a2d5-4561-9f4c-c1564419c257",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const officialPrice = 15;  // Set your single official price here\n\nreturn items.map(item => {\n  item.json.officialPrice = officialPrice;\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        200
+      ],
+      "id": "5586fb48-2e5c-471c-96f0-f11febefdcae",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "97440d56-7ae9-4291-9afa-6b93eaa36f8f",
+              "leftValue": "={{ $json.hotels[0].rate }}",
+              "rightValue": "={{ $json.officialPrice }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "59ceee07-21d0-41e8-8793-00f7ab0207f4",
+              "leftValue": "={{ $json.hotels[1].rate }}",
+              "rightValue": "={{ $json.officialPrice }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "2219e821-de1a-4b4e-81d5-fae2a5780ada",
+              "leftValue": "={{ $json.hotels[2].rate }}",
+              "rightValue": "={{ $json.officialPrice }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -300,
+        -80
+      ],
+      "id": "1c8dfdb6-449a-42c8-9a69-535b34044d06",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "sendTo": "tejidon469@dlbazi.com",
+        "subject": "=Request to Fix Pricing Discrepancy for  Hotel",
+        "emailType": "text",
+        "message": "= Hope you're doing well.  We have noticed a pricing discrepancy for our property , listed on your platform.The rate currently displayed is not aligned with the official rates we have provided.Kindly update the pricing to reflect the correct amount.Please treat this as urgent to avoid confusion for potential guests.  Feel free to reach out if you need any further details. \n Thank you for your immediate attention to this matter.  Best regards, Talha Shabir Hotel Manager ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -40,
+        180
+      ],
+      "id": "20caef88-7807-4f27-adbf-7848d2b7c365",
+      "name": "Gmail1",
+      "webhookId": "60313d93-e029-4806-b569-b92826bc6010",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Zh0Kg8f0WzPYM6cv",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U08MV3HQKQV",
+          "mode": "list",
+          "cachedResultName": "mmmvvv1112222"
+        },
+        "text": "the prices of All Hotels are fine. Thanks!",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -20,
+        -160
+      ],
+      "id": "e8eee66d-d367-44f9-b3a9-cbe383298248",
+      "name": "Slack",
+      "webhookId": "8ec112f3-bb60-4ce8-ba2a-302de2e587fb",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "ocLfRoKX66L7l0Im",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes",
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vyTJvso3GHCCGASBC5d5-SUNTCw8MB6W1yXWMYudBes/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "labelIds": "={{ $json.labelIds[0] }}",
+            "threadId": "={{ $json.threadId }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "threadId",
+              "displayName": "threadId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "labelIds",
+              "displayName": "labelIds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        180,
+        40
+      ],
+      "id": "18738ccc-1d0f-4c12-acab-1a49fc87acab",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "R1Wsc7j2qgzZe6Hv",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b0e1e66-8875-495e-9c25-8f9757d64644",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ec1984c84bca62b7c17f0853550a0a7872e4e08f0f7292f3031b19d9627fcff0"
+  },
+  "id": "r2E4C1PnURRErZQz",
+  "tags": []
+}
